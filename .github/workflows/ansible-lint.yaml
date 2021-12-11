@@ -5,10 +5,12 @@ jobs:
     name: Run ansible-lint
     runs-on: ubuntu-latest
     steps:
-      - run: DEBIAN_FRONTEND=noninteractive sudo apt-get -y update && sudo apt-get -y install ansible ansible-lint python3-pip sshpass
+      - run: sudo apt-get -y update
+      - run: sudo apt-get -y install ansible ansible-lint python3-pip sshpass
       - run: pip3 install ansible==2.9.27
       - run: pip3 install ansible-lint
       - run: pip3 install pyvmomi
       - name: Check out repository code
         uses: actions/checkout@v2
-      - run: ansible-lint --project-dir ${{ github.workspace }}
+      - run: ansible-lint -h
+#      - run: ansible-lint --project-dir ${{ github.workspace }}
