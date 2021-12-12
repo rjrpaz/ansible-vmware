@@ -1,8 +1,8 @@
 ---
 #
-# This playbook shows 'vm_name' information
+# This playbook get a list of VMs from a Cluster
 #
-- name: Get settings for a virtual machine
+- name: Get list of VMs from a Cluster
   hosts: localhost
   gather_facts: no
 
@@ -19,29 +19,15 @@
       prompt: vCenter password
       private: yes
 
-    - name: datacenter
-      prompt: VMWare datacenter
-      private: no
-
-    - name: vm_name
-      prompt: VM Name
-      private: no
-
   tasks:
-  - name: "Get VM info"
-    community.vmware.vmware_guest_info:
+  - name: Get list of VMs from a Cluster
+    community.vmware.vmware_vm_info:
       hostname: "{{ vcenter_ip }}"
       username: "{{ vcenter_username }}"
       password: "{{ vcenter_password }}"
       validate_certs: False
-      datacenter: "{{ datacenter }}"
-      name: "{{ vm_name }}"
+      vm_type: vm
     register: vm_info
     delegate_to: localhost
     connection: local
     ignore_errors: yes
-
-  - name: "Print VM info"
-    debug:
-      msg: "{{ vm_info }}"
-
