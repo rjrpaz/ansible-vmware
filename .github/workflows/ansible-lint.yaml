@@ -10,6 +10,7 @@ jobs:
       - run: pip3 install ansible==2.9.27
       - run: pip3 install ansible-lint==5.3.1
       - run: pip3 install pyvmomi
+      - run: ansible-galaxy collection install community.vmware
       - name: Check out repository code
         uses: actions/checkout@v2
       - run: ansible-lint ${{ github.workspace }}/*
