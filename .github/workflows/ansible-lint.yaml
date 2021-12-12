@@ -12,4 +12,4 @@ jobs:
       - run: pip3 install pyvmomi
       - name: Check out repository code
         uses: actions/checkout@v2
-      - run: ansible-lint --project-dir ${{ github.workspace }}
+      - run: ansible-lint ${{ github.workspace }}/*
