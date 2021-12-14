@@ -108,4 +108,17 @@ Required input variables:
 - vcenter_password: vCenter password
 - datacenter: VMWare datacenter
 - vm_name: VM Name
-- snapshot_name: Name from existent snapshot
+- snapshot_name: Name of existent snapshot
+
+### revert_to_snapshot.yml
+
+Revert VM to snapshot.
+
+Required input variables:
+
+- vcenter_ip: vCenter IP or hostname
+- vcenter_username: vCenter username
+- vcenter_password: vCenter password
+- datacenter: VMWare datacenter
+- vm_name: VM Name
+- snapshot_name: Name of existent snapshot

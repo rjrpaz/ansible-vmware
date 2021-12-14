@@ -1,0 +1,46 @@
+---
+#
+# This playbook revert VM to snapshot
+#
+- name: Revert VM to snapshot
+  hosts: localhost
+  gather_facts: no
+
+  vars_prompt:
+    - name: vcenter_ip
+      prompt: vCenter IP or hostname
+      private: no
+
+    - name: vcenter_username
+      prompt: vCenter username
+      private: no
+
+    - name: vcenter_password
+      prompt: vCenter password
+      private: yes
+
+    - name: datacenter
+      prompt: VMWare datacenter
+      private: no
+
+    - name: vm_name
+      prompt: VM Name
+      private: no
+
+    - name: snapshot_name
+      prompt: Snapshot name
+      private: no
+
+  tasks:
+  - name: Revert VM to snapshot
+    community.vmware.vmware_guest_snapshot:
+      hostname: "{{ vcenter_ip }}"
+      username: "{{ vcenter_username }}"
+      password: "{{ vcenter_password }}"
+      validate_certs: False
+      datacenter: "{{ datacenter }}"
+      name: "{{ vm_name }}"
+      state: revert
+      snapshot_name: "{{ snapshot_name }}"
+    delegate_to: localhost
+    connection: local
