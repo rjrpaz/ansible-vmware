@@ -1,8 +1,8 @@
 ---
 #
-# This playbook power on a VM
+# This playbook power off a VM
 #
-- name: "Power on VM"
+- name: "Power off VM"
   hosts: localhost
   gather_facts: no
 
@@ -44,9 +44,23 @@
     debug:
       msg: "Current power status is {{ vm_info.instance.hw_power_status }}"
 
-  - name: "Power on VM"
+  - name: "Power off VM"
     block:
-      - name: "Power on VM"
+      - name: "Shuting down VM using guest tools"
+        vmware_guest_powerstate:
+          hostname: "{{ vcenter_ip }}"
+          username: "{{ vcenter_username }}"
+          password: "{{ vcenter_password }}"
+          validate_certs: False
+          uuid: "{{ vm_info.instance.hw_product_uuid }}"
+          state: shutdown-guest
+          state_change_timeout: 240
+          force: yes
+        delegate_to: "localhost"
+        connection: local
+        when: vm_info.instance.guest_tools_status == "guestToolsRunning"
+
+      - name: "Power off VM"
         community.vmware.vmware_guest_powerstate:
           hostname: "{{ vcenter_ip }}"
           username: "{{ vcenter_username }}"

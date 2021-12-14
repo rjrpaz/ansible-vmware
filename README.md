@@ -134,3 +134,15 @@ Required input variables:
 - vcenter_password: vCenter password
 - datacenter: VMWare datacenter
 - vm_name: VM Name
+
+### poweroff_vm.yml
+
+Power off a VM.
+
+Required input variables:
+
+- vcenter_ip: vCenter IP or hostname
+- vcenter_username: vCenter username
+- vcenter_password: vCenter password
+- datacenter: VMWare datacenter
+- vm_name: VM Name

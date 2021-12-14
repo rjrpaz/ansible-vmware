@@ -39,7 +39,6 @@
     register: vm_info
     delegate_to: localhost
     connection: local
-    ignore_errors: yes
 
   - name: "Print VM info"
     debug:
