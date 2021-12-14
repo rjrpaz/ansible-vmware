@@ -1,0 +1,32 @@
+---
+#
+# This playbook get VMWare Machine Guest info
+#
+- name: Get VMWare Machine Guest info
+  hosts: localhost
+  gather_facts: no
+
+  vars_prompt:
+    - name: vcenter_ip
+      prompt: vCenter IP or hostname
+      private: no
+
+    - name: vcenter_username
+      prompt: vCenter username
+      private: no
+
+    - name: vcenter_password
+      prompt: vCenter password
+      private: yes
+
+  tasks:
+  - name: Get VMWare Machine Guest info
+    community.vmware.vmware_vm_info:
+      hostname: "{{ vcenter_ip }}"
+      username: "{{ vcenter_username }}"
+      password: "{{ vcenter_password }}"
+      validate_certs: False
+    register: vm_info
+    delegate_to: localhost
+    connection: local
+    ignore_errors: yes
