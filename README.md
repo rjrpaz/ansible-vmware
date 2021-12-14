@@ -83,3 +83,16 @@ Required input variables:
 - vcenter_password: vCenter password
 - datacenter: VMWare datacenter
 - vm_name: VM Name
+
+### take_snapshot.yml
+
+Take snapshot from VM.
+
+Required input variables:
+
+- vcenter_ip: vCenter IP or hostname
+- vcenter_username: vCenter username
+- vcenter_password: vCenter password
+- datacenter: VMWare datacenter
+- vm_name: VM Name
+- snapshot_name: Snapshot name
