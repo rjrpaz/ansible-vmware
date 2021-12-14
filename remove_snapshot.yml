@@ -52,8 +52,8 @@
       validate_certs: False
       datacenter: "{{ datacenter }}"
       name: "{{ vm_name }}"
-      state: absent
       snapshot_name: "{{ item.name }}"
+      state: absent
     delegate_to: localhost
     connection: local
     with_items: "{{ snapshot_info.guest_snapshots.snapshots }}"
