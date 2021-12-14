@@ -37,3 +37,15 @@ Required input variables:
 - vcenter_ip: vCenter IP or hostname
 - vcenter_username: vCenter username
 - vcenter_password: vCenter password
+
+### get_vm_disks.yml
+
+Get disk information for a virtual machine.
+
+Required input variables:
+
+- vcenter_ip: vCenter IP or hostname
+- vcenter_username: vCenter username
+- vcenter_password: vCenter password
+- datacenter: VMWare datacenter
+- vm_name: VM Name
