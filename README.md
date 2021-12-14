@@ -96,3 +96,16 @@ Required input variables:
 - datacenter: VMWare datacenter
 - vm_name: VM Name
 - snapshot_name: Snapshot name
+
+### remove_snapshot.yml
+
+Remove snapshot from VM.
+
+Required input variables:
+
+- vcenter_ip: vCenter IP or hostname
+- vcenter_username: vCenter username
+- vcenter_password: vCenter password
+- datacenter: VMWare datacenter
+- vm_name: VM Name
+- snapshot_name: Name from existent snapshot
