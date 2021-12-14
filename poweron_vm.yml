@@ -1,0 +1,67 @@
+---
+#
+# This playbook power on a VM
+#
+- name: "Power on VM"
+  hosts: localhost
+  gather_facts: no
+
+  vars_prompt:
+    - name: vcenter_ip
+      prompt: vCenter IP or hostname
+      private: no
+
+    - name: vcenter_username
+      prompt: vCenter username
+      private: no
+
+    - name: vcenter_password
+      prompt: vCenter password
+      private: yes
+
+    - name: datacenter
+      prompt: VMWare datacenter
+      private: no
+
+    - name: vm_name
+      prompt: VM Name
+      private: no
+
+  tasks:
+  - name: "Get VM info"
+    community.vmware.vmware_guest_info:
+      hostname: "{{ vcenter_ip }}"
+      username: "{{ vcenter_username }}"
+      password: "{{ vcenter_password }}"
+      validate_certs: False
+      datacenter: "{{ datacenter }}"
+      name: "{{ vm_name }}"
+    register: vm_info
+    delegate_to: localhost
+    connection: local
+    ignore_errors: yes
+
+  - name: "Print current power status from VM"
+    debug:
+      msg: "Current power status is {{ vm_info.instance.hw_power_status }}"
+
+  - name: "Power on VM"
+    block:
+      - name: "Power on VM"
+        community.vmware.vmware_guest_powerstate:
+          hostname: "{{ vcenter_ip }}"
+          username: "{{ vcenter_username }}"
+          password: "{{ vcenter_password }}"
+          validate_certs: False
+          uuid: "{{ vm_info.instance.hw_product_uuid }}"
+          state: powered-on
+          force: yes
+        delegate_to: "localhost"
+        connection: local
+        register: new_state
+
+      - name: "Print current power status from VM after power on"
+        debug:
+          msg: "Now power status is {{ new_state.instance.hw_power_status }}"
+
+    when: vm_info.instance.hw_power_status != "poweredOn"
