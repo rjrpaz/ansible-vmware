@@ -1,0 +1,162 @@
+---
+#
+# This playbook add disk to a VM
+#
+- name: Add disk to a VM
+  hosts: localhost
+  gather_facts: no
+
+  vars_prompt:
+    - name: vcenter_ip
+      prompt: vCenter IP or hostname
+      private: no
+
+    - name: vcenter_username
+      prompt: vCenter username
+      private: no
+
+    - name: vcenter_password
+      prompt: vCenter password
+      private: yes
+
+    - name: datacenter
+      prompt: VMWare datacenter
+      private: no
+
+    - name: vm_name
+      prompt: VM Name
+      private: no
+
+  tasks:
+  - name: "Get VM info"
+    community.vmware.vmware_guest_info:
+      hostname: "{{ vcenter_ip }}"
+      username: "{{ vcenter_username }}"
+      password: "{{ vcenter_password }}"
+      validate_certs: False
+      datacenter: "{{ datacenter }}"
+      name: "{{ vm_name }}"
+    register: vm_info
+    delegate_to: localhost
+    connection: local
+
+  - name: "Set dafault value to storage"
+    set_fact:
+      store: ""
+
+  - name: "Storage is not provided. Selected storage is where the VM resides."
+    set_fact:
+      store: "{{ vm_facts.instance.hw_datastores[0] }}"
+    when: datastore is not defined
+
+  - name: "Storage is provided: {{ datastore }}."
+    set_fact:
+      store: "{{ datastore }}"
+    when: datastore is defined
+
+  # Test if VM has snapshots
+  - name: Get snapshots of VM
+    community.vmware.vmware_guest_snapshot_info:
+      hostname: "{{ vcenter_ip }}"
+      username: "{{ vcenter_username }}"
+      password: "{{ vcenter_password }}"
+      validate_certs: False
+      datacenter: "{{ datacenter }}"
+      name: "{{ vm_name }}"
+    delegate_to: localhost
+    connection: local
+    register: snapshot_info
+
+  - block:
+      - name: "VM has snapshots. Disk tasks are not possible."
+        debug:
+          msg: "VM {{ vm_name }} has snapshots. Ending task."
+
+      - name: "End play"
+        meta: end_play
+    when: snapshot_info is defined and snapshot_info.guest_snapshots | length > 0
+
+  # Get disk list
+  - name: Get disk information for a virtual machine
+    community.vmware.vmware_guest_disk_info:
+      hostname: "{{ vcenter_ip }}"
+      username: "{{ vcenter_username }}"
+      password: "{{ vcenter_password }}"
+      validate_certs: False
+      datacenter: "{{ datacenter }}"
+      name: "{{ vm_name }}"
+    delegate_to: localhost
+    connection: local
+    register: disk_info
+
+  # Get number of the last element in list
+  - name: "Get last disk added"
+    set_fact:
+      last_disk_order: "{{ (disk_info.guest_disk_info | length) - 1 }}"
+
+  # Save info of unit number from last disk, which is more recently created
+  - name: "Get unit number"
+    set_fact:
+      unit_number: "{{ disk_info.guest_disk_info[last_disk_order].unit_number }}"
+
+  # Save info of scsi controller from last disk, which is more recently created
+  - name: "Get scsi controller of last disk"
+    set_fact:
+      scsi_controller: "{{ disk_info.guest_disk_info[last_disk_order].controller_key }}"
+
+  # Get last character of scsi controller, which is the order number
+  - name: "Get scsi controller number"
+    set_fact:
+      scsi_controller: "{{ scsi_controller[-1] | int }}"
+
+  # Increments last unit number being used.
+  - name: "Calculate new unit number"
+    set_fact:
+      unit_number: "{{ unit_number | int + 1 }}"
+
+  # Skips unit number = 7 (this is not a valid number, documented in the API)
+  - name: "Skip unit number 7"
+    set_fact:
+      unit_number: "{{ unit_number | int + 1 }}"
+    when: unit_number == "7"
+
+  # Increments scsi_controller when all unit numbers where been used ('0 <= unit_number <=15')
+  - name: "Follow to next scsi controller if needed"
+    set_fact:
+      scsi_controller: "{{ scsi_controller | int + 1 }}"
+    when: unit_number == "16"
+
+  - name: "Fails if all disks were assigned"
+    fail:
+      msg: "Invalid SCSI Controller value (Should be '0 <= scsi_controller <= 3')"
+    when: scsi_controller >= "4"
+
+  # Reset unit number (max. 15) if scsi controller is full
+  - name: "Recalculate unit number if exceeds 15"
+    set_fact:
+      unit_number: 0
+    when: unit_number == "16"
+
+  - name: "Add disk of size {{ disk_size }} Gb to {{ vm_name }} (Datastore {{ store }})"
+    community.vmware.vmware_guest_disk:
+      hostname: "{{ vcenter_ip }}"
+      username: "{{ vcenter_username }}"
+      password: "{{ vcenter_password }}"
+      validate_certs: False
+      datacenter: "{{ datacenter }}"
+      name: "{{ stored_vm_name | default(vm_name) }}"
+      disk:
+        - size_gb: "{{ disk_size }}"
+          type: thin
+          scsi_controller: "{{ scsi_controller }}"
+          unit_number: "{{ unit_number | string }}"
+          datastore: "{{ store }}"
+          state: present
+    delegate_to: localhost
+    connection: local
+    register: disk_info
+
+  - name: "Print new disk information"
+    debug:
+      msg: "Added disk {{ scsi_controller }}:{{ unit_number }}"
+    when: not disk_info.failed
