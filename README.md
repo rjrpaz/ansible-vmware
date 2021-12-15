@@ -287,3 +287,18 @@ Required input variables:
 - vcenter_password: vCenter password
 - datacenter: VMWare datacenter
 - vm_name: VM name
+
+### clone_vm_from_template.yml
+
+Clone a new VM from a template.
+
+Required input variables:
+
+- vcenter_ip: vCenter IP or hostname
+- vcenter_username: vCenter username
+- vcenter_password: vCenter password
+- datacenter: VMWare datacenter
+- datastore: VMWare datastore
+- vm_name: VM name
+- template_name: Template name
+- folder_name: Folder name
