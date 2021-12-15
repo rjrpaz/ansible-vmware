@@ -187,3 +187,15 @@ Required input variables:
 - datacenter: VMWare datacenter
 - vm_name: VM Name
 - os_version: OS Version
+
+### set_hot_add_values.yml
+
+Set "hot add" values to VM.
+
+Required input variables:
+
+- vcenter_ip: vCenter IP or hostname
+- vcenter_username: vCenter username
+- vcenter_password: vCenter password
+- datacenter: VMWare datacenter
+- vm_name: VM Name
