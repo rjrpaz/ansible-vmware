@@ -275,3 +275,15 @@ Required input variables:
 - datacenter: VMWare datacenter
 - vm_name: VM name
 - destination_folder: Destination folder
+
+### update_vmware_tools.yml
+
+Upgrade vmware tools on VM. This playbook should be used if installed VMWare tools are the one provided by VMWare. If you are using VMWare tools provided by the OS, using native OS packages are recommended.
+
+Required input variables:
+
+- vcenter_ip: vCenter IP or hostname
+- vcenter_username: vCenter username
+- vcenter_password: vCenter password
+- datacenter: VMWare datacenter
+- vm_name: VM name
