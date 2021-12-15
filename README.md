@@ -384,3 +384,14 @@ Required input variables:
 - vcenter_username: vCenter username
 - vcenter_password: vCenter password
 - datacenter: VMWare datacenter
+
+### get_dvs_portgroup.yml
+
+Get info about DVS portgroup.
+
+Required input variables:
+
+- vcenter_ip: vCenter IP or hostname
+- vcenter_username: vCenter username
+- vcenter_password: vCenter password
+- datacenter: VMWare datacenter

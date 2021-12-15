@@ -1,0 +1,44 @@
+---
+#
+# This playbook shows info about DVS portgroup
+#
+- name: Get info about DVS portgroup
+  hosts: localhost
+  gather_facts: no
+
+  vars_prompt:
+    - name: vcenter_ip
+      prompt: vCenter IP or hostname
+      private: no
+
+    - name: vcenter_username
+      prompt: vCenter username
+      private: no
+
+    - name: vcenter_password
+      prompt: vCenter password
+      private: yes
+
+    - name: datacenter
+      prompt: VMWare datacenter
+      private: no
+
+  tasks:
+  - name: "Get info about DVS portgroup"
+    community.vmware.vmware_dvs_portgroup_info:
+      hostname: "{{ vcenter_ip }}"
+      username: "{{ vcenter_username }}"
+      password: "{{ vcenter_password }}"
+      validate_certs: False
+      show_network_policy: no
+      show_port_policy: no
+      show_teaming_policy: no
+      datacenter: "{{ datacenter }}"
+    delegate_to: localhost
+    connection: local
+    register: dvs_portgroup_info
+
+  - name: "Print info about DVS portgroup"
+    debug:
+      msg: "{{ dvs_portgroup_info }}"
+
