@@ -13,5 +13,5 @@ jobs:
       - run: ansible-galaxy collection install community.vmware
       - name: Check out repository code
         uses: actions/checkout@v2
-      - run: ansible-lint ${{ github.workspace }}/*
       - run: ansible-playbook -i 'localhost,' --syntax-check ${{ github.workspace }}/*yml
+      - run: ansible-lint ${{ github.workspace }}/*

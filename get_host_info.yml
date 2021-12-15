@@ -1,0 +1,41 @@
+---
+#
+# This playbook gets host info
+#
+- name: Get host info
+  hosts: localhost
+  gather_facts: no
+
+  vars_prompt:
+    - name: vcenter_ip
+      prompt: vCenter IP or hostname
+      private: no
+
+    - name: vcenter_username
+      prompt: vCenter username
+      private: no
+
+    - name: vcenter_password
+      prompt: vCenter password
+      private: yes
+
+    - name: esxi_hostname
+      prompt: ESXI hostname
+      private: no
+
+  tasks:
+  - name: "Get host info"
+    community.vmware.vmware_host_facts:
+      hostname: "{{ vcenter_ip }}"
+      username: "{{ vcenter_username }}"
+      password: "{{ vcenter_password }}"
+      validate_certs: False
+      esxi_hostname: "{{ esxi_hostname }}"
+    delegate_to: localhost
+    connection: local
+    register: host_facts
+
+  - name: "Print Host info"
+    debug:
+      msg: "{{ host_facts }}"
+

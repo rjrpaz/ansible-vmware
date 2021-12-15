@@ -4,6 +4,11 @@ Ansible playbooks to manage vmware infrastructure.
 
 Most of this playbooks use *name* as the parameter to identify a VM. However, name are not necessarily unique in a VMWare cluster. If this is the case, playbook should be modified to use *uuid*, which is a unique identifier to a VM.
 
+This project uses Github actions to:
+
+- Check playbook syntax
+- Check playbook with a linter (ansible-lint v. 5.3.1)
+
 ## List of playbooks
 
 You can run the playbook as follows:
@@ -342,3 +347,14 @@ Required input variables:
 - vcenter_username: vCenter username
 - vcenter_password: vCenter password
 - datacenter: VMWare datacenter
+
+### get_host_info.yml
+
+Get host info.
+
+Required input variables:
+
+- vcenter_ip: vCenter IP or hostname
+- vcenter_username: vCenter username
+- vcenter_password: vCenter password
+- esxi_hostname: ESXI hostname
