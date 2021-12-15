@@ -1,0 +1,56 @@
+---
+#
+# This playbook configures os version to VM
+#
+- name: Configure os version to VM
+  hosts: localhost
+  gather_facts: no
+
+  vars_prompt:
+    - name: vcenter_ip
+      prompt: vCenter IP or hostname
+      private: no
+
+    - name: vcenter_username
+      prompt: vCenter username
+      private: no
+
+    - name: vcenter_password
+      prompt: vCenter password
+      private: yes
+
+    - name: datacenter
+      prompt: VMWare datacenter
+      private: no
+
+    - name: vm_name
+      prompt: VM Name
+      private: no
+
+    - name: os_version
+      prompt: OS Version
+      private: no
+
+  tasks:
+  - name: "Get VM info"
+    community.vmware.vmware_guest_info:
+      hostname: "{{ vcenter_ip }}"
+      username: "{{ vcenter_username }}"
+      password: "{{ vcenter_password }}"
+      validate_certs: False
+      datacenter: "{{ datacenter }}"
+      name: "{{ vm_name }}"
+    register: vm_info
+    delegate_to: localhost
+    connection: local
+
+  - name: "Configure os version to VM"
+    community.vmware.vmware_guest:
+      hostname: "{{ vcenter_ip }}"
+      username: "{{ vcenter_username }}"
+      password: "{{ vcenter_password }}"
+      validate_certs: False
+      uuid: "{{ vm_info.instance.hw_product_uuid }}"
+      guest_id: "{{ os_version }}"
+    delegate_to: "localhost"
+    connection: local
