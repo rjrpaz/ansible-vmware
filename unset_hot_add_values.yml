@@ -1,8 +1,8 @@
 ---
 #
-# This playbook set hot add values to VM
+# This playbook unset hot add values to VM
 #
-- name: Set hot add values to VM
+- name: Unset hot add values to VM
   hosts: localhost
   gather_facts: no
 
@@ -49,7 +49,7 @@
         meta: end_play
     when: vm_info.instance.hw_power_status != "poweredOff"
 
-  - name: "Set hot add values to VM"
+  - name: "Unset hot add values to VM"
     community.vmware.vmware_guest:
       hostname: "{{ vcenter_ip }}"
       username: "{{ vcenter_username }}"
@@ -57,7 +57,8 @@
       validate_certs: False
       uuid: "{{ vm_info.instance.hw_product_uuid }}"
       hardware:
-        hotadd_cpu: true
-        hotadd_memory: true
+        hotadd_cpu: false
+        hotadd_memory: false
     delegate_to: "localhost"
     connection: local
+
