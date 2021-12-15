@@ -290,7 +290,7 @@ Required input variables:
 
 ### clone_vm_from_template.yml
 
-Clone a new VM from a template.
+Clone a new VM from a template. Another VM can be used as source.
 
 Required input variables:
 
@@ -302,3 +302,20 @@ Required input variables:
 - vm_name: VM name
 - template_name: Template name
 - folder_name: Folder name
+- cluster_name: Cluster name
+
+### clone_template_from_template.yml
+
+Clone a new template from an existent template.
+
+Required input variables:
+
+- vcenter_ip: vCenter IP or hostname
+- vcenter_username: vCenter username
+- vcenter_password: vCenter password
+- datacenter: VMWare datacenter
+- datastore: VMWare datastore
+- vm_name: VM name
+- template_name: Template name
+- folder_name: Folder name
+- cluster_name: Cluster name
