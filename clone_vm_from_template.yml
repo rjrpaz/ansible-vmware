@@ -1,0 +1,65 @@
+---
+#
+# This playbook clones a new VM from a template
+#
+- name: Clone a new VM from a template
+  hosts: localhost
+  gather_facts: no
+
+  vars_prompt:
+    - name: vcenter_ip
+      prompt: vCenter IP or hostname
+      private: no
+
+    - name: vcenter_username
+      prompt: vCenter username
+      private: no
+
+    - name: vcenter_password
+      prompt: vCenter password
+      private: yes
+
+    - name: datacenter
+      prompt: VMWare datacenter
+      private: no
+
+    - name: vm_name
+      prompt: VM name
+      private: no
+
+    - name: template_name
+      prompt: Template name
+      private: no
+
+    - name: folder_name
+      prompt: Folder name
+      private: no
+
+    - name: cluster_name
+      prompt: Cluster name
+      private: no
+
+    - name: datastore
+      prompt: VMWare datastore
+      private: no
+
+  tasks:
+  - name: "Clone VM from template"
+    community.vmware.vmware_guest:
+      hostname: "{{ vcenter_ip }}"
+      username: "{{ vcenter_username }}"
+      password: "{{ vcenter_password }}"
+      validate_certs: False
+      name: "{{ vm_name }}"
+      template: "{{ template_name }}"
+      datacenter: "{{ datacenter }}"
+      folder: "{{ folder_name }}"
+      state: poweredoff
+      cluster: "{{ cluster_name }}"
+      datastore: "{{ datastore }}"
+      convert: thin
+      hardware:
+        hotadd_memory: true
+        hotadd_cpu: true
+    delegate_to: localhost
+    connection: local

@@ -1,0 +1,113 @@
+---
+#
+# This playbook delete last disk from VM
+#
+- name: Delete last disk from VM
+  hosts: localhost
+  gather_facts: no
+
+  vars_prompt:
+    - name: vcenter_ip
+      prompt: vCenter IP or hostname
+      private: no
+
+    - name: vcenter_username
+      prompt: vCenter username
+      private: no
+
+    - name: vcenter_password
+      prompt: vCenter password
+      private: yes
+
+    - name: datacenter
+      prompt: VMWare datacenter
+      private: no
+
+    - name: vm_name
+      prompt: VM Name
+      private: no
+
+  tasks:
+  - name: Get snapshots of VM
+    community.vmware.vmware_guest_snapshot_info:
+      hostname: "{{ vcenter_ip }}"
+      username: "{{ vcenter_username }}"
+      password: "{{ vcenter_password }}"
+      validate_certs: False
+      datacenter: "{{ datacenter }}"
+      name: "{{ vm_name }}"
+    delegate_to: localhost
+    connection: local
+    register: snapshot_info
+
+  # Test if VM has snapshots
+  - block:
+      - name: "VM has snapshots. Disk tasks are not possible."
+        debug:
+          msg: "VM {{ vm_name }} has snapshots. Ending task."
+
+      - name: "End play"
+        meta: end_play
+    when: snapshot_info.guest_snapshots | length > 0
+
+  # Get disk list
+  - name: Get disk information for a virtual machine
+    community.vmware.vmware_guest_disk_info:
+      hostname: "{{ vcenter_ip }}"
+      username: "{{ vcenter_username }}"
+      password: "{{ vcenter_password }}"
+      validate_certs: False
+      datacenter: "{{ datacenter }}"
+      name: "{{ vm_name }}"
+    delegate_to: localhost
+    connection: local
+    register: disk_info
+
+  # Get number of the last element in list
+  - name: "Get last element in the list of disks"
+    set_fact:
+      last_disk_order: "{{ (disk_info.guest_disk_info | length) - 1 }}"
+
+  # Save info of unit number from last disk, which is more recently created
+  - name: "Get unit number of last disk"
+    set_fact:
+      unit_number: "{{ disk_info.guest_disk_info[last_disk_order].unit_number }}"
+
+  # Save info of scsi controller from last disk, which is more recently created
+  - name: "Get scsi controller of last disk"
+    set_fact:
+      scsi_controller: "{{ disk_info.guest_disk_info[last_disk_order].controller_key }}"
+
+  # Get last character of scsi controller, which is the order number
+  - name: "Get scsi controller number of last disk"
+    set_fact:
+      scsi_controller: "{{ scsi_controller[-1] | int }}"
+
+  # Exclude first two disks, because they are part of the template
+  - name: "Fails if selected disk is the OS disk"
+    fail:
+      msg: "This disk can't be deleted {{ scsi_controller }}:{{ unit_number }}"
+    when: (scsi_controller | int == 0) and (unit_number | int < 2)
+
+
+  - name: "Delete last disk from VM"
+    community.vmware.vmware_guest_disk:
+      hostname: "{{ vcenter_ip }}"
+      username: "{{ vcenter_username }}"
+      password: "{{ vcenter_password }}"
+      validate_certs: False
+      datacenter: "{{ datacenter }}"
+      name: "{{ stored_vm_name | default(vm_name) }}"
+      disk:
+        - scsi_controller: "{{ scsi_controller }}"
+          unit_number: "{{ unit_number | string }}"
+          state: absent
+    delegate_to: localhost
+    connection: local
+    register: disk_info
+
+  - name: "Print removed disk information"
+    debug:
+      msg: "Deleted disk {{ scsi_controller }}:{{ unit_number }}"
+    when: not disk_info.failed
+

@@ -1,0 +1,60 @@
+---
+#
+# This playbook remove snapshot from VM
+#
+- name: Remove snapshot from VM
+  hosts: localhost
+  gather_facts: no
+
+  vars_prompt:
+    - name: vcenter_ip
+      prompt: vCenter IP or hostname
+      private: no
+
+    - name: vcenter_username
+      prompt: vCenter username
+      private: no
+
+    - name: vcenter_password
+      prompt: vCenter password
+      private: yes
+
+    - name: datacenter
+      prompt: VMWare datacenter
+      private: no
+
+    - name: vm_name
+      prompt: VM Name
+      private: no
+
+    - name: snapshot_name
+      prompt: Snapshot name
+      private: no
+
+  tasks:
+  - name: Get snapshots of VM
+    community.vmware.vmware_guest_snapshot_info:
+      hostname: "{{ vcenter_ip }}"
+      username: "{{ vcenter_username }}"
+      password: "{{ vcenter_password }}"
+      validate_certs: False
+      datacenter: "{{ datacenter }}"
+      name: "{{ vm_name }}"
+    delegate_to: localhost
+    connection: local
+    register: snapshot_info
+
+  - name: Remove snapshot from VM (if exist)
+    community.vmware.vmware_guest_snapshot:
+      hostname: "{{ vcenter_ip }}"
+      username: "{{ vcenter_username }}"
+      password: "{{ vcenter_password }}"
+      validate_certs: False
+      datacenter: "{{ datacenter }}"
+      name: "{{ vm_name }}"
+      snapshot_name: "{{ item.name }}"
+      state: absent
+    delegate_to: localhost
+    connection: local
+    with_items: "{{ snapshot_info.guest_snapshots.snapshots }}"
+    when: item.name == snapshot_name

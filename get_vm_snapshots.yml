@@ -1,8 +1,8 @@
 ---
 #
-# This playbook shows real VM size
+# This playbook list snapshots of VM
 #
-- name: Get VM size
+- name: Get snapshots of VM
   hosts: localhost
   gather_facts: no
 
@@ -28,8 +28,8 @@
       private: no
 
   tasks:
-  - name: Get VM size
-    community.vmware.vmware_guest_disk_info:
+  - name: Get snapshots of VM
+    community.vmware.vmware_guest_snapshot_info:
       hostname: "{{ vcenter_ip }}"
       username: "{{ vcenter_username }}"
       password: "{{ vcenter_password }}"
@@ -38,18 +38,4 @@
       name: "{{ vm_name }}"
     delegate_to: localhost
     connection: local
-    register: disk_info
-
-  - name: "Set default value to total_storage_size"
-    set_fact:
-      total_storage_size: "0"
-
-  - name: "Set value to total_storage_size"
-    set_fact:
-      total_storage_size: "{{ total_storage_size | int + item.value.capacity_in_kb | int }}"
-    with_dict: "{{ disk_info.guest_disk_info }}"
-
-  - name: "Convert value to Gb"
-    set_fact:
-      total_storage_size: "{{ total_storage_size | int / (1024 * 1024) }}"
-
+    register: snapshot_info

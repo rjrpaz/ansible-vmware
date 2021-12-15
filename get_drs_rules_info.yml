@@ -1,8 +1,8 @@
 ---
 #
-# This playbook shows 'vm_name' information
+# This playbook shows DRS rules info
 #
-- name: Get settings for a virtual machine
+- name: Get DRS rules info
   hosts: localhost
   gather_facts: no
 
@@ -23,24 +23,19 @@
       prompt: VMWare datacenter
       private: no
 
-    - name: vm_name
-      prompt: VM Name
-      private: no
-
   tasks:
-  - name: "Get VM info"
-    community.vmware.vmware_guest_info:
+  - name: "Get DRS rules info"
+    community.vmware.vmware_drs_rule_info:
       hostname: "{{ vcenter_ip }}"
       username: "{{ vcenter_username }}"
       password: "{{ vcenter_password }}"
-      validate_certs: False
       datacenter: "{{ datacenter }}"
-      name: "{{ vm_name }}"
-    register: vm_info
+      validate_certs: False
     delegate_to: localhost
     connection: local
+    register: drs_info
 
-  - name: "Print VM info"
+  - name: "Print DRS rules info"
     debug:
-      msg: "{{ vm_info }}"
+      msg: "{{ drs_info }}"
 

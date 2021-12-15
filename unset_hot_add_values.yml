@@ -1,8 +1,8 @@
 ---
 #
-# This playbook shows 'vm_name' information
+# This playbook unset hot add values to VM
 #
-- name: Get settings for a virtual machine
+- name: Unset hot add values to VM
   hosts: localhost
   gather_facts: no
 
@@ -40,7 +40,25 @@
     delegate_to: localhost
     connection: local
 
-  - name: "Print VM info"
-    debug:
-      msg: "{{ vm_info }}"
+  - block:
+      - name: "Ends play if VM is not powered off"
+        debug:
+          msg: "This play must be applied when VM is powered off"
+
+      - name: "End play"
+        meta: end_play
+    when: vm_info.instance.hw_power_status != "poweredOff"
+
+  - name: "Unset hot add values to VM"
+    community.vmware.vmware_guest:
+      hostname: "{{ vcenter_ip }}"
+      username: "{{ vcenter_username }}"
+      password: "{{ vcenter_password }}"
+      validate_certs: False
+      uuid: "{{ vm_info.instance.hw_product_uuid }}"
+      hardware:
+        hotadd_cpu: false
+        hotadd_memory: false
+    delegate_to: "localhost"
+    connection: local
 

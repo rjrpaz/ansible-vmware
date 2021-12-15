@@ -1,8 +1,8 @@
 ---
 #
-# This playbook shows 'vm_name' information
+# This playbook shows info about DVS portgroup
 #
-- name: Get settings for a virtual machine
+- name: Get info about DVS portgroup
   hosts: localhost
   gather_facts: no
 
@@ -23,24 +23,22 @@
       prompt: VMWare datacenter
       private: no
 
-    - name: vm_name
-      prompt: VM Name
-      private: no
-
   tasks:
-  - name: "Get VM info"
-    community.vmware.vmware_guest_info:
+  - name: "Get info about DVS portgroup"
+    community.vmware.vmware_dvs_portgroup_info:
       hostname: "{{ vcenter_ip }}"
       username: "{{ vcenter_username }}"
       password: "{{ vcenter_password }}"
       validate_certs: False
+      show_network_policy: no
+      show_port_policy: no
+      show_teaming_policy: no
       datacenter: "{{ datacenter }}"
-      name: "{{ vm_name }}"
-    register: vm_info
     delegate_to: localhost
     connection: local
+    register: dvs_portgroup_info
 
-  - name: "Print VM info"
+  - name: "Print info about DVS portgroup"
     debug:
-      msg: "{{ vm_info }}"
+      msg: "{{ dvs_portgroup_info }}"
 

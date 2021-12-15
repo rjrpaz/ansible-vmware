@@ -1,8 +1,8 @@
 ---
 #
-# This playbook shows real VM size
+# This playbook removes a VM by name
 #
-- name: Get VM size
+- name: Remove VM
   hosts: localhost
   gather_facts: no
 
@@ -28,28 +28,16 @@
       private: no
 
   tasks:
-  - name: Get VM size
-    community.vmware.vmware_guest_disk_info:
+  - name: "Remove VM"
+    community.vmware.vmware_guest:
       hostname: "{{ vcenter_ip }}"
       username: "{{ vcenter_username }}"
       password: "{{ vcenter_password }}"
       validate_certs: False
-      datacenter: "{{ datacenter }}"
       name: "{{ vm_name }}"
+      force: true
+      state: absent
     delegate_to: localhost
     connection: local
-    register: disk_info
-
-  - name: "Set default value to total_storage_size"
-    set_fact:
-      total_storage_size: "0"
-
-  - name: "Set value to total_storage_size"
-    set_fact:
-      total_storage_size: "{{ total_storage_size | int + item.value.capacity_in_kb | int }}"
-    with_dict: "{{ disk_info.guest_disk_info }}"
-
-  - name: "Convert value to Gb"
-    set_fact:
-      total_storage_size: "{{ total_storage_size | int / (1024 * 1024) }}"
+    register: vm_guest
 

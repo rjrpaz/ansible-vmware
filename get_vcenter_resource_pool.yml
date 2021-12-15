@@ -1,8 +1,8 @@
 ---
 #
-# This playbook shows 'vm_name' information
+# This playbook shows resource pool info
 #
-- name: Get settings for a virtual machine
+- name: Get resource pool info
   hosts: localhost
   gather_facts: no
 
@@ -19,28 +19,18 @@
       prompt: vCenter password
       private: yes
 
-    - name: datacenter
-      prompt: VMWare datacenter
-      private: no
-
-    - name: vm_name
-      prompt: VM Name
-      private: no
-
   tasks:
-  - name: "Get VM info"
-    community.vmware.vmware_guest_info:
+  - name: "Get resource pool info"
+    community.vmware.vmware_resource_pool_info:
       hostname: "{{ vcenter_ip }}"
       username: "{{ vcenter_username }}"
       password: "{{ vcenter_password }}"
       validate_certs: False
-      datacenter: "{{ datacenter }}"
-      name: "{{ vm_name }}"
-    register: vm_info
     delegate_to: localhost
     connection: local
+    register: resource_pool_info
 
-  - name: "Print VM info"
+  - name: "Print resource pool info"
     debug:
-      msg: "{{ vm_info }}"
+      msg: "{{ resource_pool_info }}"
 

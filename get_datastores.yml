@@ -1,8 +1,8 @@
 ---
 #
-# This playbook shows 'vm_name' information
+# This playbook shows datastores info
 #
-- name: Get settings for a virtual machine
+- name: Get datastores
   hosts: localhost
   gather_facts: no
 
@@ -23,24 +23,19 @@
       prompt: VMWare datacenter
       private: no
 
-    - name: vm_name
-      prompt: VM Name
-      private: no
-
   tasks:
-  - name: "Get VM info"
-    community.vmware.vmware_guest_info:
+  - name: "Get datastores"
+    community.vmware.vmware_datastore_info:
       hostname: "{{ vcenter_ip }}"
       username: "{{ vcenter_username }}"
       password: "{{ vcenter_password }}"
       validate_certs: False
       datacenter: "{{ datacenter }}"
-      name: "{{ vm_name }}"
-    register: vm_info
     delegate_to: localhost
     connection: local
+    register: datastore_info
 
-  - name: "Print VM info"
+  - name: "Print datastores info"
     debug:
-      msg: "{{ vm_info }}"
+      msg: "{{ datastore_info }}"
 

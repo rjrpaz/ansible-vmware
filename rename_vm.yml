@@ -1,0 +1,68 @@
+---
+#
+# This playbook renames a VM
+#
+- name: Rename VM
+  hosts: localhost
+  gather_facts: no
+
+  vars_prompt:
+    - name: vcenter_ip
+      prompt: vCenter IP or hostname
+      private: no
+
+    - name: vcenter_username
+      prompt: vCenter username
+      private: no
+
+    - name: vcenter_password
+      prompt: vCenter password
+      private: yes
+
+    - name: datacenter
+      prompt: VMWare datacenter
+      private: no
+
+    - name: vm_name
+      prompt: VM name
+      private: no
+
+    - name: new_vm_name
+      prompt: New vm name
+      private: no
+
+  tasks:
+  - name: "Get VM info"
+    community.vmware.vmware_guest_info:
+      hostname: "{{ vcenter_ip }}"
+      username: "{{ vcenter_username }}"
+      password: "{{ vcenter_password }}"
+      validate_certs: False
+      datacenter: "{{ datacenter }}"
+      name: "{{ vm_name }}"
+    register: vm_info
+    delegate_to: localhost
+    connection: local
+
+  - name: "Set value to cluster_name (hw_cluster is defined)"
+    set_fact:
+      cluster_name: "{{ vm_facts.instance.hw_cluster }}"
+    when: vm_facts.instance.hw_cluster is defined
+
+  - name: "Set value to cluster_name (hw_cluster is not defined)"
+    set_fact:
+      cluster_name: "{{ vm_facts.instance.hw_folder.split('/')[1] }}"
+    when: vm_facts.instance.hw_cluster is not defined
+
+  - name: "Rename VM"
+    community.vmware.vmware_guest:
+      hostname: "{{ vcenter_ip }}"
+      username: "{{ vcenter_username }}"
+      password: "{{ vcenter_password }}"
+      datacenter: "{{ datacenter }}"
+      validate_certs: False
+      cluster: "{{ cluster_name }}"
+      uuid: "{{ vm_facts.instance.hw_product_uuid }}"
+      name: "{{ new_vm_name }}"
+    delegate_to: localhost
+    connection: local
