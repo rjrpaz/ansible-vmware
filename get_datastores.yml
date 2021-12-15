@@ -1,0 +1,41 @@
+---
+#
+# This playbook shows datastores info
+#
+- name: Get datastores
+  hosts: localhost
+  gather_facts: no
+
+  vars_prompt:
+    - name: vcenter_ip
+      prompt: vCenter IP or hostname
+      private: no
+
+    - name: vcenter_username
+      prompt: vCenter username
+      private: no
+
+    - name: vcenter_password
+      prompt: vCenter password
+      private: yes
+
+    - name: datacenter
+      prompt: VMWare datacenter
+      private: no
+
+  tasks:
+  - name: "Get datastores"
+    community.vmware.vmware_datastore_info:
+      hostname: "{{ vcenter_ip }}"
+      username: "{{ vcenter_username }}"
+      password: "{{ vcenter_password }}"
+      validate_certs: False
+      datacenter: "{{ datacenter }}"
+    delegate_to: localhost
+    connection: local
+    register: datastore_info
+
+  - name: "Print datastores info"
+    debug:
+      msg: "{{ datastore_info }}"
+
