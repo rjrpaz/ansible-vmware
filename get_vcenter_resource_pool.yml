@@ -1,0 +1,36 @@
+---
+#
+# This playbook shows resource pool info
+#
+- name: Get resource pool info
+  hosts: localhost
+  gather_facts: no
+
+  vars_prompt:
+    - name: vcenter_ip
+      prompt: vCenter IP or hostname
+      private: no
+
+    - name: vcenter_username
+      prompt: vCenter username
+      private: no
+
+    - name: vcenter_password
+      prompt: vCenter password
+      private: yes
+
+  tasks:
+  - name: "Get resource pool info"
+    community.vmware.vmware_resource_pool_info:
+      hostname: "{{ vcenter_ip }}"
+      username: "{{ vcenter_username }}"
+      password: "{{ vcenter_password }}"
+      validate_certs: False
+    delegate_to: localhost
+    connection: local
+    register: resource_pool_info
+
+  - name: "Print resource pool info"
+    debug:
+      msg: "{{ resource_pool_info }}"
+

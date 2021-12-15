@@ -395,3 +395,13 @@ Required input variables:
 - vcenter_username: vCenter username
 - vcenter_password: vCenter password
 - datacenter: VMWare datacenter
+
+### get_vcenter_resource_pool.yml
+
+Get resource pool info.
+
+Required input variables:
+
+- vcenter_ip: vCenter IP or hostname
+- vcenter_username: vCenter username
+- vcenter_password: vCenter password
