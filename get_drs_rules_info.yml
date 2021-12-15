@@ -1,0 +1,41 @@
+---
+#
+# This playbook shows DRS rules info
+#
+- name: Get DRS rules info
+  hosts: localhost
+  gather_facts: no
+
+  vars_prompt:
+    - name: vcenter_ip
+      prompt: vCenter IP or hostname
+      private: no
+
+    - name: vcenter_username
+      prompt: vCenter username
+      private: no
+
+    - name: vcenter_password
+      prompt: vCenter password
+      private: yes
+
+    - name: datacenter
+      prompt: VMWare datacenter
+      private: no
+
+  tasks:
+  - name: "Get DRS rules info"
+    community.vmware.vmware_drs_rule_info:
+      hostname: "{{ vcenter_ip }}"
+      username: "{{ vcenter_username }}"
+      password: "{{ vcenter_password }}"
+      datacenter: "{{ datacenter }}"
+      validate_certs: False
+    delegate_to: localhost
+    connection: local
+    register: drs_info
+
+  - name: "Print DRS rules info"
+    debug:
+      msg: "{{ drs_info }}"
+

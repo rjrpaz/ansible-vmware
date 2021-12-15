@@ -358,3 +358,14 @@ Required input variables:
 - vcenter_username: vCenter username
 - vcenter_password: vCenter password
 - esxi_hostname: ESXI hostname
+
+### get_drs_rules_info.yml
+
+Get DRS rules info.
+
+Required input variables:
+
+- vcenter_ip: vCenter IP or hostname
+- vcenter_username: vCenter username
+- vcenter_password: vCenter password
+- datacenter: VMWare datacenter
