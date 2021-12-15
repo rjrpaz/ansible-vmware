@@ -159,3 +159,16 @@ Required input variables:
 - datacenter: VMWare datacenter
 - vm_name: VM Name
 - cpu_number: Number of CPUs
+
+### raise_vm_memory.yml
+
+Raise cpu number for a VM.
+
+Required input variables:
+
+- vcenter_ip: vCenter IP or hostname
+- vcenter_username: vCenter username
+- vcenter_password: vCenter password
+- datacenter: VMWare datacenter
+- vm_name: VM Name
+- memory_size: Size of memory

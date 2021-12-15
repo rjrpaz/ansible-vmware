@@ -27,8 +27,8 @@
       prompt: VM Name
       private: no
 
-    - name: cpu_number
-      prompt: Number of CPUs
+    - name: memory_size
+      prompt: Size of memory
       private: no
 
   tasks:
@@ -44,7 +44,7 @@
     delegate_to: localhost
     connection: local
 
-  - name: "Raise cpu number for a VM"
+  - name: "Raise memory size for a VM"
     community.vmware.vmware_guest:
       hostname: "{{ vcenter_ip }}"
       username: "{{ vcenter_username }}"
@@ -52,12 +52,12 @@
       validate_certs: False
       uuid: "{{ vm_info.instance.hw_product_uuid }}"
       hardware:
-        num_cpus: "{{ cpu_number|int }}"
-    when: (cpu_number|int) > vm_info.instance.hw_processor_count
+        memory_mb: "{{ memory_size|int * 1024 }}"
+    when: (memory_size|int * 1024) > vm_info.instance.hw_memtotal_mb
     delegate_to: "localhost"
     connection: local
 
-  - name: "Requested number of CPUs should be grater than existent"
+  - name: "Requested memory should be larger than existent"
     debug:
-      msg: "Requested number of CPUs should be grater than existent ( {{ (cpu_number|int) }} <= {{ vm_info.instance.hw_processor_count }} !)"
-    when: (cpu_number|int) <= vm_info.instance.hw_processor_count
+      msg: "Requested memory should be larger than existent ( {{ (memory_size|int * 1024) }} <= {{ vm_info.instance.hw_memtotal_mb }} !)"
+    when: (memory_size|int * 1024) <= vm_info.instance.hw_memtotal_mb
