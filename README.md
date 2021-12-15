@@ -249,3 +249,16 @@ Required input variables:
 - vm_name: VM Name
 - scsi_controller: SCSI controller
 - unit_number: Unit number
+
+### rename_vm.yml
+
+Rename VM.
+
+Required input variables:
+
+- vcenter_ip: vCenter IP or hostname
+- vcenter_username: vCenter username
+- vcenter_password: vCenter password
+- datacenter: VMWare datacenter
+- vm_name: VM name
+- new_vm_name: New vm name
