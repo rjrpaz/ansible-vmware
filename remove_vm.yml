@@ -1,0 +1,43 @@
+---
+#
+# This playbook removes a VM by name
+#
+- name: Remove VM
+  hosts: localhost
+  gather_facts: no
+
+  vars_prompt:
+    - name: vcenter_ip
+      prompt: vCenter IP or hostname
+      private: no
+
+    - name: vcenter_username
+      prompt: vCenter username
+      private: no
+
+    - name: vcenter_password
+      prompt: vCenter password
+      private: yes
+
+    - name: datacenter
+      prompt: VMWare datacenter
+      private: no
+
+    - name: vm_name
+      prompt: VM Name
+      private: no
+
+  tasks:
+  - name: "Remove VM"
+    community.vmware.vmware_guest:
+      hostname: "{{ vcenter_ip }}"
+      username: "{{ vcenter_username }}"
+      password: "{{ vcenter_password }}"
+      validate_certs: False
+      name: "{{ vm_name }}"
+      force: true
+      state: absent
+    delegate_to: localhost
+    connection: local
+    register: vm_guest
+

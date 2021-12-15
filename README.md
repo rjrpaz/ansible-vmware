@@ -319,3 +319,15 @@ Required input variables:
 - template_name: Template name
 - folder_name: Folder name
 - cluster_name: Cluster name
+
+### remove_vm.yml
+
+Remove a VM. Is probably a better idea to remove VMs according to *uuid* instead of names, due to the fact that VM names are not necessarily unique.
+
+Required input variables:
+
+- vcenter_ip: vCenter IP or hostname
+- vcenter_username: vCenter username
+- vcenter_password: vCenter password
+- datacenter: VMWare datacenter
+- vm_name: VM name
