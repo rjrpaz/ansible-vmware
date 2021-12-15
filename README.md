@@ -262,3 +262,16 @@ Required input variables:
 - datacenter: VMWare datacenter
 - vm_name: VM name
 - new_vm_name: New vm name
+
+### move_vm.yml
+
+Move VM to a new folder.
+
+Required input variables:
+
+- vcenter_ip: vCenter IP or hostname
+- vcenter_username: vCenter username
+- vcenter_password: vCenter password
+- datacenter: VMWare datacenter
+- vm_name: VM name
+- destination_folder: Destination folder

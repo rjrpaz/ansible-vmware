@@ -1,0 +1,62 @@
+---
+#
+# This playbook moves a VM to a new folder
+#
+- name: Move VM to a new folder
+  hosts: localhost
+  gather_facts: no
+
+  vars_prompt:
+    - name: vcenter_ip
+      prompt: vCenter IP or hostname
+      private: no
+
+    - name: vcenter_username
+      prompt: vCenter username
+      private: no
+
+    - name: vcenter_password
+      prompt: vCenter password
+      private: yes
+
+    - name: datacenter
+      prompt: VMWare datacenter
+      private: no
+
+    - name: vm_name
+      prompt: VM Name
+      private: no
+
+    - name: destination_folder
+      prompt: Destination folder
+      private: no
+
+  tasks:
+  - name: "Get VM info"
+    community.vmware.vmware_guest_info:
+      hostname: "{{ vcenter_ip }}"
+      username: "{{ vcenter_username }}"
+      password: "{{ vcenter_password }}"
+      validate_certs: False
+      datacenter: "{{ datacenter }}"
+      name: "{{ vm_name }}"
+    register: vm_info
+    delegate_to: localhost
+    connection: local
+
+  - name: "Move VM to new folder"
+    community.vmware.vmware_guest_move:
+      hostname: "{{ vcenter_ip }}"
+      username: "{{ vcenter_username }}"
+      password: "{{ vcenter_password }}"
+      validate_certs: False
+      datacenter: "{{ datacenter }}"
+      name: "{{ vm_name }}"
+      dest_folder: "{{ destination_folder }}"
+    delegate_to: localhost
+    connection: local
+    register: new_vm_info
+
+  - name: "Print new destination folder"
+    debug:
+      msg: "Move {{ vm_name }} from {{ vm_info.instance.hw_folder }} to {{ new_vm_info.instance.hw_folder }}"
