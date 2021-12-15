@@ -1,0 +1,137 @@
+---
+#
+# This playbook resizes disk in VM
+#
+- name: Resizing disk in VM
+  hosts: localhost
+  gather_facts: no
+
+  vars_prompt:
+    - name: vcenter_ip
+      prompt: vCenter IP or hostname
+      private: no
+
+    - name: vcenter_username
+      prompt: vCenter username
+      private: no
+
+    - name: vcenter_password
+      prompt: vCenter password
+      private: yes
+
+    - name: datacenter
+      prompt: VMWare datacenter
+      private: no
+
+    - name: vm_name
+      prompt: VM Name
+      private: no
+
+    - name: scsi_controller
+      prompt: SCSI controller
+      private: no
+
+    - name: unit_number
+      prompt: Unit number
+      private: no
+
+  tasks:
+  # Test if VM has snapshots
+  - name: Get snapshots of VM
+    community.vmware.vmware_guest_snapshot_info:
+      hostname: "{{ vcenter_ip }}"
+      username: "{{ vcenter_username }}"
+      password: "{{ vcenter_password }}"
+      validate_certs: False
+      datacenter: "{{ datacenter }}"
+      name: "{{ vm_name }}"
+    delegate_to: localhost
+    connection: local
+    register: snapshot_info
+
+  - block:
+      - name: "VM has snapshots. Disk tasks are not possible."
+        debug:
+          msg: "VM {{ vm_name }} has snapshots. Ending task."
+
+      - name: "End play"
+        meta: end_play
+    when: snapshot_info.guest_snapshots | length > 0
+
+  # Get disk list
+  - name: Get disk information for a virtual machine
+    community.vmware.vmware_guest_disk_info:
+      hostname: "{{ vcenter_ip }}"
+      username: "{{ vcenter_username }}"
+      password: "{{ vcenter_password }}"
+      validate_certs: False
+      datacenter: "{{ datacenter }}"
+      name: "{{ vm_name }}"
+    delegate_to: localhost
+    connection: local
+    register: disk_info
+
+  - name: "Set default value to size_in_kb"
+    set_fact:
+      size_in_kb: 0
+
+  - name: "Set default value to datastore"
+    set_fact:
+      datastore: ""
+
+  - name: "Set value to full_scsi_controller"
+    set_fact:
+      full_scsi_controller: "100{{ scsi_controller }} "
+
+  - name: "Set value to size_in_kb"
+    set_fact:
+      size_in_kb: "{{ item.value.capacity_in_kb }} "
+    loop: "{{ lookup('dict', disk_info.guest_disk_facts) }}"
+    when: (item.value.unit_number == unit_number| int) and (item.value.controller_key | int == full_scsi_controller | int)
+
+  - name: "Set value to datastore"
+    set_fact:
+      datastore: "{{ item.value.backing_datastore }}"
+    loop: "{{ lookup('dict', disk_info.guest_disk_facts) }}"
+    when: (item.value.unit_number == unit_number| int) and (item.value.controller_key | int == full_scsi_controller | int)
+
+  - block:
+      - name: "Finish play if no disk is found"
+        debug:
+          msg: "No disk was found on location {{ scsi_controller }}:{{ unit_number }}"
+
+      - name: "End play"
+        meta: end_play
+    when: size_in_kb == 0
+
+  - block:
+      - name: "Finish play if new size is not bigger than the actual size"
+        debug:
+          msg: "New size ({{ new_disk_size }} Gb) should be greater than current size ({{ ( size_in_kb | int) / (1024 *  1024) }} Gb)"
+
+      - name: "End play"
+        meta: end_play
+    when: (new_disk_size | int * 1024 * 1024) <= size_in_kb | int
+
+  - name: "Resizing disk in VM"
+    community.vmware.vmware_guest_disk:
+      hostname: "{{ vcenter_ip }}"
+      username: "{{ vcenter_username }}"
+      password: "{{ vcenter_password }}"
+      validate_certs: False
+      datacenter: "{{ datacenter }}"
+      name: "{{ vm_name }}"
+      disk:
+        - size_gb: "{{ new_disk_size }}"
+          scsi_controller: "{{ scsi_controller }}"
+          unit_number: "{{ unit_number }}"
+          datastore: "{{ datastore }}"
+          state: present
+    delegate_to: localhost
+    connection: local
+    register: new_disk_info
+
+  - name: "Print information of modified disk"
+    debug:
+      msg: "Resizing disk {{ scsi_controller }}:{{ unit_number }} in VM {{ vm_name }} up to {{ new_disk_size }} Gb (Datastore: {{ datastore }})"
+    when: not new_disk_info.failed

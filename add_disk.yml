@@ -46,7 +46,7 @@
 
   - name: "Storage is not provided. Selected storage is where the VM resides."
     set_fact:
-      store: "{{ vm_facts.instance.hw_datastores[0] }}"
+      store: "{{ vm_info.instance.hw_datastores[0] }}"
     when: datastore is not defined
 
   - name: "Storage is provided: {{ datastore }}."
