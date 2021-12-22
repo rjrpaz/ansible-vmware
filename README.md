@@ -385,6 +385,17 @@ Required input variables:
 - vcenter_password: vCenter password
 - datacenter: VMWare datacenter
 
+### get_emptiest_datastore.yml
+
+Get emptiest datastore.
+
+Required input variables:
+
+- vcenter_ip: vCenter IP or hostname
+- vcenter_username: vCenter username
+- vcenter_password: vCenter password
+- datacenter: VMWare datacenter
+
 ### get_dvs_portgroup.yml
 
 Get info about DVS portgroup.

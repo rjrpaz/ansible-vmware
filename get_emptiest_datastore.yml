@@ -1,0 +1,60 @@
+---
+#
+# This playbook shows emptiest datastore
+#
+- name: Get emptiest datastore
+  hosts: localhost
+  gather_facts: no
+
+  vars_prompt:
+    - name: vcenter_ip
+      prompt: vCenter IP or hostname
+      private: no
+
+    - name: vcenter_username
+      prompt: vCenter username
+      private: no
+
+    - name: vcenter_password
+      prompt: vCenter password
+      private: yes
+
+    - name: datacenter
+      prompt: VMWare datacenter
+      private: no
+
+  tasks:
+  - name: "Get datastores"
+    community.vmware.vmware_datastore_info:
+      hostname: "{{ vcenter_ip }}"
+      username: "{{ vcenter_username }}"
+      password: "{{ vcenter_password }}"
+      validate_certs: False
+      datacenter: "{{ datacenter }}"
+    delegate_to: localhost
+    connection: local
+    register: datastore_info
+
+
+  - name: "Set default value for var max_freespace"
+    set_fact:
+      max_freespace: 0
+
+  - name: "Get list of free space available"
+    set_fact:
+      list_freespaces: "{{ datastore_info.datastores | map(attribute='freeSpace') | list }}"
+
+  - name: "Get maximun space available"
+    set_fact:
+      max_freespace: "{{ list_freespaces | max | int }}"
+
+  - name: "Get emptiest storage"
+    set_fact:
+      emptiest_storage: "{{ item.name }}"
+    with_items: "{{ datastore_info.datastores }}"
+    when: item.freeSpace | int == max_freespace | int
+
+  - name: "Print emptiest datastore info"
+    debug:
+      msg: "Storage {{ emptiest_storage }} has {{ max_freespace }} bytes of free space"
+
