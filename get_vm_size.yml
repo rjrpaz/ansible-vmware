@@ -53,3 +53,6 @@
     set_fact:
       total_storage_size: "{{ total_storage_size | int / (1024 * 1024) }}"
 
+  - name: "Print VM size"
+    debug:
+      msg: "Total storage size of '{{ vm_name }}' is {{ total_storage_size | int }} Gb"
